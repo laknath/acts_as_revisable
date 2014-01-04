@@ -51,7 +51,7 @@ module WithoutScope
                         original_#{method_name} *(args << options)
                       end
                     else
-                      original_#{method_name}(*args)
+                      original_#{method_name.strip}(*args)
                     end
                   else
                     options[:revision_number] = self.revision_number if use_revision
