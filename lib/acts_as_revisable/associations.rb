@@ -30,8 +30,12 @@ module WithoutScope
 
         base.revisable_class.reflect_on_all_associations(:has_many).each do |r|
           unless [:revisions, :branches, base.revision_class_name.tableize.to_sym].include?(r.name)
-            [:' ', :_ids].each do |helper|
-              method_name = ((helper == :_ids || helper == :_ids=) && r.name.to_s.singularize || r.name.to_s) + helper.to_s
+            [:'', :_ids].each do |helper|
+              method_name = if helper == :_ids 
+                r.name.to_s.singularize + helper.to_s
+              else
+                r.name.to_s
+              end
 
               # using an alias so one can alias the +association+ to +revised_association+ if needed
               unless base.respond_to?(:revisable_class_name)
@@ -48,10 +52,10 @@ module WithoutScope
                   if current_revision?
                     if use_revision
                       #{r.class_name}.where("#{base.revisable_class.name.underscore}_vid = ?", options[:revision_number] || self.revision_number).scoping do
-                        original_#{method_name} *(args << options)
+                        original_#{method_name} *(args)
                       end
                     else
-                      original_#{method_name.strip}(*args)
+                      original_#{method_name}(*args)
                     end
                   else
                     options[:revision_number] = self.revision_number if use_revision
@@ -62,6 +66,7 @@ module WithoutScope
             end
           end
         end
+      end
 
  #      base.instance_eval do
  #        base.revisable_class.reflect_on_all_associations(:has_many).each do |r|
@@ -72,7 +77,6 @@ module WithoutScope
  #          end
  #        end
  #      end
-      end
 
       # With belongs_to_fixations association_belonged_to => :first
       # update the column :association_vid to the current active association revision number
