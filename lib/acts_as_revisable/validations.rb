@@ -12,7 +12,7 @@ module WithoutScope
 
         if options[:uniqueness]
           options[:uniqueness] = {} if options[:uniqueness] == true
-          options[:uniqueness][:scope] = options[:uniqueness][:scope].to_a << :revisable_is_current
+          options[:uniqueness][:scope] = Array(options[:uniqueness][:scope]) << :revisable_is_current
         end
         super(*(args << options))
       end
